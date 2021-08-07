@@ -3,8 +3,13 @@ from numpy.core.numeric import normalize_axis_tuple
 import pandas
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn import metrics
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
 
 
+
+#-----------------------find q1, q3 of box plot(doesn't use)---------------------------
 def findLower_Upper(data:list):
     q1 = np.quantile(data, 0.25)
     q3 = np.quantile(data, 0.75)
@@ -15,17 +20,18 @@ def findLower_Upper(data:list):
 
     return lower_bound, upper_bound
 
+#-----------------------function for normalize values---------------------------
 def normalize(data):
     return [((item - min(data)) / ((max(data)-min(data)))) for item in data]
 
 
 
-
+#-----------------------read data from file---------------------------
 data = pandas.read_csv('ADANIPORTS.csv')
 
 date, lastClose, open, high, low, last, close, volume = data['Date'], data['Prev Close'], data['Open'], data['High'], data['Low'], data['Last'], data['Close'], data['Volume']
 
-#normalize values
+#-----------------------normalize values---------------------------
 lastClose = normalize(lastClose)
 open = normalize(open)
 high = normalize(high)
@@ -34,7 +40,7 @@ last = normalize(last)
 close = normalize(close)
 volume = normalize(volume)
 
-
+#-----------------------visualization---------------------------
 plt.subplot(1,3,1)
 plt.plot(open)
 plt.ylabel('price')
@@ -50,24 +56,53 @@ plt.title('close')
 
 plt.show()
 
+
+#-----------------------create and set value for features and labels---------------------------
+
 features = []
-for i in range(len(date)):
+label = []
+for i in range(len(date)): # if we dont add high and low to featurs, give better result
     tempList = []
     tempList.append(lastClose[i])
-    tempList.append(high[i])
-    tempList.append(low[i])
+    # tempList.append(high[i])
+    # tempList.append(low[i])
     tempList.append(last[i])
     tempList.append(close[i])
     if close[i] - lastClose[i] >= 0:
-        tempList.append('Positive')
+        label.append('Positive')
     else:
-        tempList.append('Negative')    
-    features.append(tempList) 
-
-print(features)       
+        label.append('Negative')    
+    features.append(tempList)  
 
 
 
+features = np.array(features)
+y = np.array(label)
+
+#-----------------------create test array and train array (80% of data => train)---------------------------
+
+X_train, X_test, y_train, y_test = train_test_split(features, y, test_size=0.2)
+print('shape of y_train:', y_train.shape)
+print('shape of y_train:', y_test.shape)
+
+
+#-----------------------use KNN algorithm and predict values---------------------------
+scores = {}
+
+for i in range(1,31):
+    knn = KNeighborsClassifier(n_neighbors=i)
+    knn.fit(X_train, y_train)
+    pred = knn.predict(X_test)
+
+    scores[i] = metrics.accuracy_score(y_test, pred)
+
+print('result: (k : predicted result)')
+print(scores)
+
+
+#-----------------------plot result of KNN---------------------------
+plt.plot(range(1,31), scores.values())
+plt.show()
 
 
     
