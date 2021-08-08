@@ -78,7 +78,7 @@ for i in range(len(date)):
     tempList.append(close[i])
     tempList.append(volume[i])
     tempList.append(Turnover[i])
-    try:
+    try: #for handle error of divide by zero
         tempList.append(volume[i]/Turnover[i])
     except:
         tempList.append(0.0) 
