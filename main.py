@@ -71,7 +71,7 @@ for i in range(len(close)):
 label.pop(-1)
 
 for i in range(len(date)):
-    tempList = []
+    tempList = [] 
     # tempList.append(high[i])
     # tempList.append(low[i])
     tempList.append(last[i])
