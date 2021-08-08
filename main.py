@@ -29,7 +29,8 @@ def normalize(data):
 #-----------------------read data from file---------------------------
 data = pandas.read_csv('ADANIPORTS.csv')
 
-date, lastClose, open, high, low, last, close, volume = data['Date'], data['Prev Close'], data['Open'], data['High'], data['Low'], data['Last'], data['Close'], data['Volume']
+date, lastClose, open, high, low, last, close, volume, Turnover = data['Date'], data['Prev Close'], data['Open'], data['High'], data['Low'], data['Last'], data['Close'], data['Volume'], data['Turnover']
+volume = volume.astype(float)
 
 #-----------------------normalize values---------------------------
 lastClose = normalize(lastClose)
@@ -39,40 +40,55 @@ low = normalize(low)
 last = normalize(last)
 close = normalize(close)
 volume = normalize(volume)
+Turnover = normalize(Turnover)
 
 #-----------------------visualization---------------------------
-plt.subplot(1,3,1)
-plt.plot(open)
-plt.ylabel('price')
-plt.title('open')
+# plt.subplot(1,3,1)
+# plt.plot(open)
+# plt.ylabel('price')
+# plt.title('open')
 
-plt.subplot(1,3,2)
-plt.plot(last)
-plt.title('last')
+# plt.subplot(1,3,2)
+# plt.plot(last)
+# plt.title('last')
 
-plt.subplot(1,3,3)
-plt.plot(close)
-plt.title('close')
+# plt.subplot(1,3,3)
+# plt.plot(close)
+# plt.title('close')
 
-plt.show()
+# plt.show()
 
 
 #-----------------------create and set value for features and labels---------------------------
-
-features = []
 label = []
-for i in range(len(date)): # if we dont add high and low to featurs, give better result
+features = []
+
+for i in range(len(close)):
+    if close[i] - lastClose[i] > 0:
+        label.append('Positive')
+    else: 
+        label.append('Negative')  
+label.pop(-1)
+
+for i in range(len(date)):
     tempList = []
-    tempList.append(lastClose[i])
     # tempList.append(high[i])
     # tempList.append(low[i])
     tempList.append(last[i])
     tempList.append(close[i])
-    if close[i] - lastClose[i] >= 0:
-        label.append('Positive')
-    else:
-        label.append('Negative')    
-    features.append(tempList)  
+    tempList.append(volume[i])
+    tempList.append(Turnover[i])
+    try:
+        tempList.append(volume[i]/Turnover[i])
+    except:
+        tempList.append(0.0) 
+    try:
+        tempList.append(close[i]/last[i])
+    except:
+        tempList.append(0.0)    
+
+    features.append(tempList)
+features.pop(-1)    
 
 
 
@@ -81,9 +97,10 @@ y = np.array(label)
 
 #-----------------------create test array and train array (80% of data => train)---------------------------
 
-X_train, X_test, y_train, y_test = train_test_split(features, y, test_size=0.2)
+X_train, X_test, y_train, y_test = train_test_split(features, y, test_size=0.09)
 print('shape of y_train:', y_train.shape)
-print('shape of y_train:', y_test.shape)
+print('shape of y_test:', y_test.shape)
+print('=======================')
 
 
 #-----------------------use KNN algorithm and predict values---------------------------
@@ -98,7 +115,10 @@ for i in range(1,31):
 
 print('result: (k : predicted result)')
 print(scores)
+print('=======================')
 
+Keymax = max(scores, key=scores.get)
+print(str(Keymax),':',scores[Keymax])
 
 #-----------------------plot result of KNN---------------------------
 plt.plot(range(1,31), scores.values())
