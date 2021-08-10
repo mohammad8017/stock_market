@@ -156,13 +156,13 @@ def UseSVR(features, y):
 
 	print(metrics.r2_score(y_test, pred))
 
-	plt.plot(y_test, 'b')
-	plt.plot(pred, 'r')
-	plt.show()
-
-	plt.plot(y_test, 'bo')
-	plt.plot(pred, 'rx')
-	plt.show()
+	# plt.plot(y_test, 'b')
+	# plt.plot(pred, 'r')
+	# plt.show()
+	return y_test
+	# plt.plot(y_test, 'bo')
+	# plt.plot(pred, 'rx')
+	# plt.show()
 
 
 
@@ -232,7 +232,12 @@ y = np.array(y)
 #-------------------------------for RandomForest and SVM---------------------------------------
 #RFModel(allFeatures, y)
 
-UseSVR(allFeatures, y)
+y_test = UseSVR(allFeatures, y)
+
+print(metrics.r2_score(y_test, avg7[-299:]))
+plt.plot(y_test, 'b')
+plt.plot(avg7[-299:], 'r')
+plt.show()
 
 
 #-------------------------------for decision tree---------------------------------------
